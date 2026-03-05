@@ -1,0 +1,1831 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JobHunter — Encuentra tu trabajo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #f7f6f3;
+    --surface:  #ffffff;
+    --surface2: #f0ede8;
+    --border:   #e0dcd4;
+    --border2:  #ccc8c0;
+    --text:     #1a1814;
+    --text2:    #6b6460;
+    --text3:    #9e9890;
+    --accent:   #1a56db;
+    --accent-bg:#eff4ff;
+    --accent-border:#c7d9fc;
+    --green:    #12a050;
+    --green-bg: #ecfdf5;
+    --amber:    #c27c0a;
+    --amber-bg: #fffbeb;
+    --red:      #d94040;
+    --red-bg:   #fef2f2;
+    --radius:   10px;
+    --shadow:   0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md:0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  }
+
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+
+  select option { background: #fff; color: var(--text); }
+  input[type=date]::-webkit-calendar-picker-indicator { opacity: 0.4; cursor: pointer; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .fade-up { animation: fadeUp 0.35s ease forwards; }
+
+  .tab-btn {
+    padding: 9px 18px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text2);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 13.5px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+    letter-spacing: -0.1px;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { border-bottom-color: var(--accent); color: var(--accent); font-weight: 600; }
+
+  .btn-primary {
+    padding: 10px 22px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: background 0.15s, transform 0.1s;
+    box-shadow: 0 1px 3px rgba(26,86,219,0.25);
+  }
+  .btn-primary:hover { background: #1648c0; }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-primary:disabled { background: var(--border2); box-shadow: none; cursor: not-allowed; }
+
+  .btn-secondary {
+    padding: 10px 18px;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 13.5px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .btn-secondary:hover { border-color: var(--border2); background: var(--surface2); }
+
+  .btn-danger {
+    padding: 10px 18px;
+    background: var(--red-bg);
+    color: var(--red);
+    border: 1px solid #fbd5d5;
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 13.5px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-danger:hover { background: #fde8e8; }
+
+  .input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(26,86,219,0.1); }
+  .input::placeholder { color: var(--text3); }
+
+  .textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 12.5px;
+    padding: 12px 14px;
+    border-radius: var(--radius);
+    outline: none;
+    resize: vertical;
+    line-height: 1.75;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(26,86,219,0.1); }
+  .textarea::placeholder { color: var(--text3); font-family: 'DM Sans', sans-serif; }
+
+  .select {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    outline: none;
+    transition: border-color 0.15s;
+    cursor: pointer;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239e9890' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+  }
+  .select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(26,86,219,0.1); }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+
+  .label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text2);
+    letter-spacing: 0.02em;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  .form-group { margin-bottom: 16px; }
+
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+  .spinner.dark {
+    border-color: rgba(0,0,0,0.1);
+    border-top-color: var(--text2);
+  }
+
+  .tip-box {
+    background: var(--accent-bg);
+    border: 1px solid var(--accent-border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #1e40af;
+    line-height: 1.65;
+    margin-bottom: 20px;
+  }
+
+  .upload-zone {
+    border: 2px dashed var(--border2);
+    border-radius: 12px;
+    padding: 32px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    background: var(--surface);
+    position: relative;
+  }
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--accent);
+    background: var(--accent-bg);
+  }
+  .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .output-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.85;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-word;
+    min-height: 180px;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  .link-card {
+    display: block;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+    cursor: pointer;
+  }
+  .link-card:hover {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+
+  .progress-bar-track { height: 4px; background: var(--border); border-radius: 99px; overflow: hidden; }
+  .progress-bar-fill  { height: 100%; background: var(--accent); border-radius: 99px; transition: width 0.4s cubic-bezier(0.4,0,0.2,1); }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+  @media (max-width: 600px) {
+    .grid2 { grid-template-columns: 1fr !important; }
+    .grid4 { grid-template-columns: 1fr 1fr !important; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useCallback, useEffect, useRef } = React;
+
+// ── API KEY ──────────────────────────────────────────────────────────────────
+const ANTHROPIC_API_KEY = "YOUR_API_KEY_HERE";
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── COMPANY LINKS POR CARRERA ─────────────────────────────────────────────────
+const CAREER_COMPANIES = {
+  aerospace: [
+    { name:"Airbus",           url:"https://www.airbus.com/en/careers/search-and-apply",          note:"Patrocina visa, programas Early Career" },
+    { name:"Safran",           url:"https://www.safran-group.com/careers/job-offers",              note:"Abierto a talento latinoamericano" },
+    { name:"Honeywell",        url:"https://careers.honeywell.com/us/en/search-results",           note:"Manufactura y tecnologia global" },
+    { name:"Collins Aerospace",url:"https://jobs.collinsaerospace.com/search-jobs",                note:"Operaciones en Mexico y global" },
+    { name:"Embraer",          url:"https://embraer.com/global/en/careers",                        note:"Brasil, facil reubicacion" },
+    { name:"SpaceX",           url:"https://www.spacex.com/careers/",                              note:"Lider en propulsion y cohetes" },
+    { name:"NASA Jobs",        url:"https://www.usajobs.gov/Search/Results?k=aerospace",           note:"Programas de investigacion" },
+    { name:"Pratt & Whitney",  url:"https://jobs.rtx.com/search-jobs/Pratt%20%26%20Whitney",       note:"Motores aeronauticos" },
+  ],
+  software: [
+    { name:"Google",           url:"https://careers.google.com/jobs/results/",                     note:"Lider tecnologico global" },
+    { name:"Microsoft",        url:"https://careers.microsoft.com/us/en/search-results",           note:"Gran presencia en LATAM" },
+    { name:"IBM",              url:"https://www.ibm.com/employment/",                              note:"Consultoría y nube empresarial" },
+    { name:"Meta",             url:"https://www.metacareers.com/jobs",                             note:"Redes sociales e IA" },
+    { name:"Amazon",           url:"https://www.amazon.jobs/en/",                                  note:"AWS, e-commerce, tech" },
+    { name:"Wizeline",         url:"https://www.wizeline.com/careers/",                            note:"Empresa tech con hub en Mexico" },
+    { name:"Clip",             url:"https://www.clip.mx/trabaja-con-nosotros",                     note:"Fintech mexicana en crecimiento" },
+    { name:"Rappi Tech",       url:"https://about.rappi.com/careers",                             note:"Startup LATAM, ingenieria de producto" },
+  ],
+  automotive: [
+    { name:"Bosch Mexico",     url:"https://www.bosch.com.mx/nuestra-empresa/trabaja-con-nosotros/", note:"Manufactura avanzada" },
+    { name:"Continental AG",   url:"https://jobs.continental.com/en/",                             note:"Hub importante en Mexico" },
+    { name:"Lear Corporation", url:"https://lear.wd5.myworkdayjobs.com/LearCareers",               note:"Automotriz global" },
+    { name:"Toyota",           url:"https://www.toyota.com/usa/careers",                           note:"Manufactura y calidad" },
+    { name:"Ford Motor",       url:"https://corporate.ford.com/careers.html",                      note:"Electromovilidad y manufactura" },
+    { name:"General Motors",   url:"https://search-careers.gm.com/",                               note:"Operaciones importantes en Mexico" },
+    { name:"Stellantis",       url:"https://www.stellantis.com/en/careers",                        note:"FCA, Chrysler, Jeep" },
+    { name:"Nemak",            url:"https://nemak.com/careers/",                                   note:"Empresa mexicana automotriz global" },
+  ],
+  mechanical: [
+    { name:"Siemens",          url:"https://jobs.siemens.com/careers",                             note:"Industria y automatizacion" },
+    { name:"GE Vernova",       url:"https://jobs.gecareers.com/vernova/global/en/",                 note:"Energia y manufactura" },
+    { name:"Caterpillar",      url:"https://careers.caterpillar.com/en/",                          note:"Maquinaria y construccion" },
+    { name:"3M",               url:"https://www.3m.com/3M/en_US/careers-us/",                      note:"Manufactura e innovacion" },
+    { name:"Parker Hannifin",  url:"https://ph.wd5.myworkdayjobs.com/Parker_External",             note:"Sistemas de movimiento y control" },
+    { name:"Honeywell",        url:"https://careers.honeywell.com/us/en/search-results",           note:"Automatizacion industrial" },
+    { name:"Grupo IDESA",      url:"https://www.idesa.com/trabaja-con-nosotros/",                  note:"Petroquimica en Mexico" },
+    { name:"Cemex",            url:"https://www.cemex.com/careers",                                note:"Empresa mexicana global" },
+  ],
+  electrical: [
+    { name:"ABB",              url:"https://careers.abb/global/en",                                note:"Electronica de potencia y robots" },
+    { name:"Schneider Electric",url:"https://www.se.com/ww/en/about-us/careers/",                 note:"Energia y automatizacion" },
+    { name:"Eaton",            url:"https://eaton.eightfold.ai/careers",                           note:"Gestion de energia" },
+    { name:"Siemens Energy",   url:"https://jobs.siemens-energy.com/jobs",                         note:"Sector energetico global" },
+    { name:"CFE",              url:"https://www.cfe.mx/corporativo/convocatorias",                 note:"Comision Federal de Electricidad" },
+    { name:"Tesla",            url:"https://www.tesla.com/careers/search",                         note:"Electromovilidad y baterias" },
+    { name:"Intel",            url:"https://jobs.intel.com/en",                                    note:"Semiconductores y hardware" },
+    { name:"Foxconn",          url:"https://careers.foxconn.com/",                                 note:"Manufactura electronica global" },
+  ],
+  civil: [
+    { name:"AECOM",            url:"https://aecom.jobs/",                                          note:"Infraestructura y construccion global" },
+    { name:"Jacobs",           url:"https://careers.jacobs.com/",                                  note:"Ingenieria civil y ambiental" },
+    { name:"ICA Fluor",        url:"https://www.icafluor.com.mx/candidatos/",                      note:"Construccion e ingenieria en Mexico" },
+    { name:"Grupo Carso",      url:"https://www.grupocarso.com.mx/vacantes/",                      note:"Construccion, telecoms, industria" },
+    { name:"GCC",              url:"https://gcc.com/es/vacantes/",                                 note:"Cemento y construccion" },
+    { name:"Vinci Construction",url:"https://jobs.vinci.com/offres-emploi/ingenierie-construction",note:"Lider mundial en construccion" },
+    { name:"SNC-Lavalin",      url:"https://www.snclavalin.com/en/careers",                        note:"Ingenieria y proyectos" },
+    { name:"SICT Mexico",      url:"https://www.sct.gob.mx/transportes/",                          note:"Secretaria de Infraestructura" },
+  ],
+  chemical: [
+    { name:"BASF",             url:"https://www.basf.com/global/en/careers.html",                  note:"Mayor empresa quimica del mundo" },
+    { name:"Dow",              url:"https://careers.dow.com/",                                     note:"Quimica y materiales" },
+    { name:"DuPont",           url:"https://jobs.dupont.com/",                                     note:"Materiales especializados" },
+    { name:"Pemex",            url:"https://www.pemex.com/empleo/",                                note:"Petroleo y gas en Mexico" },
+    { name:"Sigma Alimentos",  url:"https://www.sigma-alimentos.com/es/carreras/",                 note:"Empresa mexicana global, alimentos" },
+    { name:"Grupo Bimbo",      url:"https://jobs.grupobimbo.com/",                                 note:"Alimentos, multinacional mexicana" },
+    { name:"Mexichem / Orbia", url:"https://www.orbia.com/careers/",                              note:"Quimica especializada" },
+    { name:"Air Products",     url:"https://www.airproducts.com/company/careers",                  note:"Gases industriales" },
+  ],
+  finance: [
+    { name:"BBVA Mexico",      url:"https://bbva.talentify.io/company/bbva-mexico",                note:"Banco lider en Mexico" },
+    { name:"Banorte",          url:"https://www.banorte.com/wps/portal/banorte/Home/acercadebanorte/careers", note:"Banco 100% mexicano" },
+    { name:"Deloitte",         url:"https://apply.deloitte.com/careers/SearchJobs/",               note:"Big Four, consultoria financiera" },
+    { name:"KPMG",             url:"https://home.kpmg/xx/en/home/careers.html",                    note:"Auditoria y consultoria" },
+    { name:"GBM",              url:"https://www.gbm.mx/vacantes",                                  note:"Casa de bolsa mexicana" },
+    { name:"Nubank",           url:"https://boards.greenhouse.io/nubank",                          note:"Fintech LATAM en crecimiento" },
+    { name:"Konfio",           url:"https://konfio.mx/nosotros/",                                  note:"Fintech mexicana, credito pyme" },
+    { name:"BlackRock",        url:"https://careers.blackrock.com/",                               note:"Mayor gestora de activos global" },
+  ],
+  health: [
+    { name:"Pfizer",           url:"https://www.pfizer.com/about/careers",                         note:"Farmaceutica global lider" },
+    { name:"Bayer",            url:"https://career.bayer.com/",                                    note:"Salud, quimica y agricultura" },
+    { name:"IMSS",             url:"https://www.imss.gob.mx/convocatorias",                        note:"Instituto Mexicano del Seguro Social" },
+    { name:"Grupo Angeles",    url:"https://www.grupoangeles.com.mx/trabaja-con-nosotros/",        note:"Hospitales privados en Mexico" },
+    { name:"Johnson & Johnson",url:"https://jobs.jnj.com/",                                        note:"Dispositivos medicos y farma" },
+    { name:"Abbott",           url:"https://www.jobs.abbott/",                                     note:"Diagnostico y nutricion" },
+    { name:"Medtronic",        url:"https://jobs.medtronic.com/",                                  note:"Dispositivos medicos, hub en Mexico" },
+    { name:"Cruz Roja Mexicana",url:"https://www.cruzrojamexicana.org.mx/",                        note:"ONG salud, oportunidades diversas" },
+  ],
+  design: [
+    { name:"Canva",            url:"https://www.canva.com/careers/",                               note:"Diseño digital, remoto" },
+    { name:"Figma",            url:"https://www.figma.com/careers/",                               note:"Herramienta de diseño UX/UI" },
+    { name:"IDEO",             url:"https://www.ideo.com/jobs",                                    note:"Consultora de diseño e innovacion" },
+    { name:"Televisa",         url:"https://www.televisa.com/contacto/",                           note:"Medios y contenido en Mexico" },
+    { name:"Ogilvy Mexico",    url:"https://www.ogilvy.com/careers",                               note:"Publicidad y creatividad" },
+    { name:"Grupo W",          url:"https://www.grupow.com/talento/",                              note:"Agencia de diseno y marketing MX" },
+    { name:"Adobe",            url:"https://www.adobe.com/careers.html",                           note:"Software de diseno creativo" },
+    { name:"Shopify",          url:"https://www.shopify.com/careers",                              note:"Diseño de producto, remoto" },
+  ],
+  marketing: [
+    { name:"Google",           url:"https://careers.google.com/jobs/results/?category=MARKETING",  note:"Marketing digital global" },
+    { name:"Meta",             url:"https://www.metacareers.com/jobs?teams[0]=Marketing",           note:"Publicidad y redes sociales" },
+    { name:"Ogilvy",           url:"https://www.ogilvy.com/careers",                               note:"Agencia creativa global" },
+    { name:"Mercado Libre",    url:"https://jobs.mercadolibre.com/",                               note:"E-commerce LATAM lider" },
+    { name:"Heineken Mexico",  url:"https://careers.heineken.com/search/",                         note:"Marketing masivo FMCG" },
+    { name:"Procter & Gamble", url:"https://www.pgcareers.com/",                                   note:"Bienes de consumo global" },
+    { name:"Unilever",         url:"https://careers.unilever.com/",                                note:"FMCG, fuerte en LATAM" },
+    { name:"Publicis",         url:"https://www.publicisgroupe.com/en/careers",                    note:"Grupo publicitario global" },
+  ],
+  law: [
+    { name:"Baker McKenzie",   url:"https://jobs.bakermckenzie.com/",                              note:"Top firma legal global con oficina en MX" },
+    { name:"Chevez Ruiz Zamarripa",url:"https://www.chevez.com/es/empleo/",                        note:"Firma fiscal y legal de referencia en MX" },
+    { name:"Ritch Mueller",    url:"https://www.ritch.com.mx/careers",                             note:"Derecho corporativo Mexico" },
+    { name:"White & Case",     url:"https://www.whitecase.com/careers",                            note:"Firma global, oficina CDMX" },
+    { name:"PGR / FGR",        url:"https://www.fgr.org.mx/convocatoria/convocatoria_home.html",   note:"Fiscalia General de la Republica" },
+    { name:"SAT Mexico",       url:"https://www.sat.gob.mx/tramites/operacion/28247",              note:"Servicio de Administracion Tributaria" },
+    { name:"IMCO",             url:"https://imco.org.mx/empleo/",                                  note:"Instituto Mex. Competitividad, politica publica" },
+    { name:"Galicia Abogados", url:"https://galicia.mx/es/vacantes",                               note:"Derecho bancario y financiero" },
+  ],
+  education: [
+    { name:"Tecnologico de Monterrey",url:"https://jobs.tec.mx/",                                  note:"Universidad privada lider en MX" },
+    { name:"UNAM",             url:"https://oferta.unam.mx/",                                      note:"Mayor universidad de LATAM" },
+    { name:"Santillana",       url:"https://www.santillana.com.mx/trabaja-con-nosotros/",          note:"Editorial educativa" },
+    { name:"Coursera",         url:"https://careers.coursera.org/",                                note:"EdTech, remoto" },
+    { name:"Duolingo",         url:"https://careers.duolingo.com/",                                note:"Aprendizaje de idiomas, tech" },
+    { name:"Khan Academy",     url:"https://www.khanacademy.org/careers",                          note:"ONG educativa global" },
+    { name:"SEP Mexico",       url:"https://dgem.sep.gob.mx/",                                    note:"Secretaria de Educacion Publica" },
+    { name:"Kumon",            url:"https://www.kumon.com.mx/es_MX/franquicias",                   note:"Metodo educativo, franquicias" },
+  ],
+  general: [
+    { name:"Grupo Bimbo",      url:"https://jobs.grupobimbo.com/",                                 note:"Multinacional mexicana global" },
+    { name:"Cemex",            url:"https://www.cemex.com/careers",                                note:"Empresa mexicana global" },
+    { name:"America Movil",    url:"https://www.americamovil.com/careers",                         note:"Telecomunicaciones LATAM" },
+    { name:"Femsa",            url:"https://jobs.femsa.com/",                                      note:"Bebidas y comercio, MX global" },
+    { name:"Walmart Mexico",   url:"https://www.walmartmexico.com.mx/trabaja-con-nosotros",        note:"Retail lider en Mexico" },
+    { name:"Mercado Libre",    url:"https://jobs.mercadolibre.com/",                               note:"E-commerce lider en LATAM" },
+    { name:"Amazon Mexico",    url:"https://www.amazon.jobs/es/locations/mexico-city-mexico",       note:"Logistica y tecnologia" },
+    { name:"Liverpool",        url:"https://www.liverpool.com.mx/tienda/Content/careers",          note:"Retail y moda en Mexico" },
+  ],
+};
+
+// Detecta la categoria de carrera del perfil del usuario
+function detectCareerCategory(degree, skills) {
+  const text = ((degree||"") + " " + (skills||"")).toLowerCase();
+  if (/aeroesp|aerospace|aeronauti|propuls|cohete|rocket|avion|aviaci|spacecraft/.test(text)) return "aerospace";
+  if (/software|sistemas|computation|programaci|developer|frontend|backend|fullstack|web dev|data scien|machine learn|ia |inteligencia artif|devops|cloud|python|javascript|java |kotlin|react|node\.js/.test(text)) return "software";
+  if (/automotri|automotive|manufactur|vehicul|diesel|transmisi/.test(text)) return "automotive";
+  if (/mecanic|mechanical|termodin|fluido|solid|cad|ansys|solidworks|mecanica|diseño mecan/.test(text)) return "mechanical";
+  if (/electric|electron|circuito|power|energia|pcb|fpga|embebido|electricidad|electrica/.test(text)) return "electrical";
+  if (/civil|estructur|geotecn|hidraul|urban|topograf|construcc|carretera|vialidad/.test(text)) return "civil";
+  if (/quimic|chemical|petrole|refiner|reaccion|catalis|laborator|proceso/.test(text)) return "chemical";
+  if (/finanza|finance|contabil|contadur|economia|banca|bolsa|actuar|cpa|cfa/.test(text)) return "finance";
+  if (/medic|enferm|farmac|biomed|clinico|hospital|salud|nutrici|psicolog/.test(text)) return "health";
+  if (/diseño|design|grafico|ux|ui|animaci|illustrat|photoshop|figma|branding/.test(text)) return "design";
+  if (/marketing|publicidad|comunicaci|relaciones public|digital media|seo|sem|redes social/.test(text)) return "marketing";
+  if (/derech|law|juridi|abogad|legal|notari|fiscal|juridico/.test(text)) return "law";
+  if (/educaci|pedagog|docent|maestr|profes|didactic/.test(text)) return "education";
+  return "general";
+}
+
+const STATUS_LABELS = { saved:"Guardada", applied:"Enviada", interview:"Entrevista", rejected:"Rechazada" };
+const STATUS_STYLES = {
+  saved:    { bg:"#f5f5f5",   color:"#555",    border:"#ddd" },
+  applied:  { bg:"#eff4ff",   color:"#1a56db", border:"#c7d9fc" },
+  interview:{ bg:"#fffbeb",   color:"#c27c0a", border:"#fde68a" },
+  rejected: { bg:"#fef2f2",   color:"#d94040", border:"#fbd5d5" },
+};
+
+const TABS = [
+  { id:"generator", label:"Cover Letter" },
+  { id:"jobsearch",  label:"Buscar Vacantes" },
+  { id:"analyzer",   label:"Analizar Vacante" },
+  { id:"imagejob",   label:"Vacante en Imagen" },
+  { id:"tracker",    label:"Mis Aplicaciones" },
+  { id:"strategy",   label:"Estrategia" },
+  { id:"profile",    label:"Mi Perfil" },
+];
+
+async function callClaude(prompt, system) {
+  const messages = [{ role:"user", content: prompt }];
+  const body = { model:"claude-sonnet-4-20250514", max_tokens:1200, messages };
+  if (system) body.system = system;
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json", "x-api-key":ANTHROPIC_API_KEY, "anthropic-version":"2023-06-01" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || "Error de API"); }
+  const data = await res.json();
+  return data.content?.map(b => b.text || "").join("") || "";
+}
+
+const EMPTY_PROFILE = {
+  name:"", email:"", phone:"", location:"",
+  degree:"", university:"", gradYear:"",
+  currentJob:"", currentCompany:"",
+  skills:"",
+  project1Title:"", project1Desc:"",
+  project2Title:"", project2Desc:"",
+  project3Title:"", project3Desc:"",
+  strength:"", extra:"",
+};
+
+function buildCV(p) {
+  return {
+    name: p.name,
+    email: p.email,
+    phone: p.phone,
+    location: p.location,
+    degree: `${p.degree}${p.university ? ", "+p.university : ""}${p.gradYear ? " ("+p.gradYear+")" : ""}`,
+    current: p.currentJob ? `${p.currentJob}${p.currentCompany ? " en "+p.currentCompany : ""}` : "",
+    projects: [
+      p.project1Title && `${p.project1Title}${p.project1Desc ? " — "+p.project1Desc : ""}`,
+      p.project2Title && `${p.project2Title}${p.project2Desc ? " — "+p.project2Desc : ""}`,
+      p.project3Title && `${p.project3Title}${p.project3Desc ? " — "+p.project3Desc : ""}`,
+    ].filter(Boolean),
+    skills: p.skills,
+    strength: p.strength,
+    extra: p.extra,
+  };
+}
+
+// ── CV UPLOAD + EXTRACT ───────────────────────────────────────────────────────
+const CV_EXTRACT_PROMPT = `Extract all information from this CV/resume and return ONLY a JSON object with these exact keys:
+{
+  "name": "full name",
+  "email": "email address",
+  "phone": "phone number",
+  "location": "city, state, country",
+  "degree": "degree/career name",
+  "university": "university name",
+  "gradYear": "graduation year as string",
+  "currentJob": "current or most recent job title",
+  "currentCompany": "current or most recent company",
+  "skills": "comma-separated list of technical skills",
+  "project1Title": "first notable project title",
+  "project1Desc": "brief description of first project",
+  "project2Title": "second project title if exists",
+  "project2Desc": "brief description of second project",
+  "project3Title": "third project title if exists",
+  "project3Desc": "brief description of third project",
+  "strength": "candidate's main professional strength in 1-2 sentences",
+  "extra": "any extra relevant info: languages, certifications, awards"
+}
+Return ONLY the JSON, no other text, no markdown fences.`;
+
+// Carga PDF.js desde CDN si no está disponible
+async function loadPdfJs() {
+  if (window.pdfjsLib) return window.pdfjsLib;
+  await new Promise((res, rej) => {
+    const s = document.createElement("script");
+    s.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+    s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  return window.pdfjsLib;
+}
+
+// Convierte las primeras N páginas del PDF a imágenes base64
+async function pdfToImages(file, maxPages = 3) {
+  const pdfjsLib = await loadPdfJs();
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const numPages = Math.min(pdf.numPages, maxPages);
+  const images = [];
+  for (let i = 1; i <= numPages; i++) {
+    const page = await pdf.getPage(i);
+    const viewport = page.getViewport({ scale: 1.8 }); // escala buena para legibilidad
+    const canvas = document.createElement("canvas");
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+    images.push(canvas.toDataURL("image/jpeg", 0.85).split(",")[1]);
+  }
+  return images;
+}
+
+function CVUpload({ onExtracted, isLoading, setIsLoading }) {
+  const [dragOver, setDragOver] = useState(false);
+  const [status, setStatus] = useState(null); // null | "reading" | "done" | "error"
+  const [statusMsg, setStatusMsg] = useState("");
+  const [fileName, setFileName] = useState("");
+
+  const readFileAsText = (file) => new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = () => res(reader.result);
+    reader.onerror = rej;
+    reader.readAsText(file);
+  });
+
+  const processCV = async (file) => {
+    if (!file) return;
+    const isPdf  = file.type === "application/pdf"  || file.name.match(/\.pdf$/i);
+    const isTxt  = file.type === "text/plain"        || file.name.match(/\.txt$/i);
+    const isDocx = file.name.match(/\.(doc|docx)$/i);
+    if (!isPdf && !isTxt && !isDocx) { setStatus("error"); setStatusMsg("Formato no soportado. Usa PDF, TXT o DOCX."); return; }
+
+    setFileName(file.name);
+    setStatus("reading");
+    setIsLoading(true);
+
+    try {
+      let messages;
+
+      if (isPdf) {
+        // ── PDF: renderizar páginas como imágenes y mandarlas a Claude ──────
+        setStatusMsg("Convirtiendo PDF...");
+        const images = await pdfToImages(file, 3);
+        setStatusMsg("Extrayendo información...");
+
+        // Armar contenido con todas las imágenes de las páginas
+        const contentBlocks = images.map(b64 => ({
+          type: "image",
+          source: { type: "base64", media_type: "image/jpeg", data: b64 }
+        }));
+        contentBlocks.push({ type: "text", text: CV_EXTRACT_PROMPT });
+
+        messages = [{ role: "user", content: contentBlocks }];
+
+      } else {
+        // ── TXT / DOCX: leer como texto plano ───────────────────────────────
+        setStatusMsg("Leyendo archivo...");
+        const text = await readFileAsText(file);
+        setStatusMsg("Extrayendo información...");
+        messages = [{
+          role: "user",
+          content: `${CV_EXTRACT_PROMPT}\n\nCV TEXT:\n${text.substring(0, 8000)}`
+        }];
+      }
+
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": ANTHROPIC_API_KEY,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1200, messages }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error?.message || `Error ${res.status}`);
+      }
+
+      const data = await res.json();
+      const raw  = data.content?.map(b => b.text || "").join("") || "";
+      const clean = raw.replace(/```json|```/g, "").trim();
+      const parsed = JSON.parse(clean);
+      onExtracted({ ...EMPTY_PROFILE, ...parsed });
+      setStatus("done");
+      setStatusMsg("");
+
+    } catch(e) {
+      console.error("CVUpload error:", e);
+      setStatus("error");
+      setStatusMsg(e.message || "No se pudo procesar el archivo.");
+    }
+    setIsLoading(false);
+  };
+
+  const handleFile = (e) => processCV(e.target.files?.[0]);
+
+  return (
+    <div style={{ marginBottom: 28 }}>
+      <div
+        className={`upload-zone${dragOver ? " drag-over" : ""}`}
+        onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={e => { e.preventDefault(); setDragOver(false); processCV(e.dataTransfer.files?.[0]); }}
+      >
+        <input type="file" accept=".pdf,.txt,.doc,.docx" onChange={handleFile} disabled={isLoading} />
+        {status === "reading" ? (
+          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:10 }}>
+            <div className="spinner dark" style={{ width:24, height:24, borderWidth:3 }} />
+            <div style={{ fontSize:14, fontWeight:500, color:"var(--text2)" }}>{statusMsg || "Procesando..."}</div>
+            <div style={{ fontSize:12, color:"var(--text3)" }}>Esto puede tomar unos segundos</div>
+          </div>
+        ) : status === "done" ? (
+          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:8 }}>
+            <div style={{ fontSize:24 }}>✓</div>
+            <div style={{ fontSize:14, fontWeight:600, color:"var(--green)" }}>CV cargado exitosamente</div>
+            <div style={{ fontSize:12, color:"var(--text3)" }}>{fileName} — Los campos se llenaron automáticamente</div>
+            <div style={{ fontSize:12, color:"var(--text2)", marginTop:4 }}>Puedes subir otro CV para reemplazar</div>
+          </div>
+        ) : status === "error" ? (
+          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:8 }}>
+            <div style={{ fontSize:14, fontWeight:600, color:"var(--red)" }}>No se pudo leer el archivo</div>
+            <div style={{ fontSize:12, color:"var(--text3)", maxWidth:320 }}>{statusMsg || "Intenta con un PDF, TXT o DOCX."} Haz clic para intentar de nuevo.</div>
+          </div>
+        ) : (
+          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:8 }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/>
+            </svg>
+            <div style={{ fontSize:14, fontWeight:500, color:"var(--text)" }}>Sube tu CV para autocompletar</div>
+            <div style={{ fontSize:12, color:"var(--text3)" }}>PDF, DOCX o TXT — Los campos se llenan automáticamente</div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── ONBOARDING ────────────────────────────────────────────────────────────────
+function Onboarding({ onComplete }) {
+  const [step, setStep] = useState(0);
+  const [p, setP] = useState(EMPTY_PROFILE);
+  const [cvLoading, setCvLoading] = useState(false);
+  const set = k => e => setP(f => ({ ...f, [k]: e.target.value }));
+
+  const steps = [
+    { isIntro: true },
+    { title:"Informacion personal", subtitle:"Estos datos aparecerán en tu perfil y cartas de presentación.",
+      fields:[
+        { key:"name",     label:"Nombre completo" },
+        { key:"email",    label:"Correo electronico" },
+        { key:"phone",    label:"Telefono" },
+        { key:"location", label:"Ciudad, Estado, Pais" },
+      ]
+    },
+    { title:"Educacion", subtitle:"Tu carrera y universidad.",
+      fields:[
+        { key:"degree",    label:"Carrera o titulo obtenido" },
+        { key:"university",label:"Universidad o institucion" },
+        { key:"gradYear",  label:"Año de graduacion o estimado" },
+      ]
+    },
+    { title:"Experiencia reciente", subtitle:"Tu trabajo, practica o proyecto mas reciente. Si no tienes, puedes dejarlo en blanco.",
+      fields:[
+        { key:"currentJob",     label:"Puesto o rol actual" },
+        { key:"currentCompany", label:"Empresa u organizacion" },
+      ]
+    },
+    { title:"Habilidades tecnicas", subtitle:"Ingresa tus habilidades separadas por comas. Cuanto mas especifico seas, mejor sera tu cover letter.",
+      fields:[{ key:"skills", label:"Habilidades tecnicas y herramientas", ml:true }]
+    },
+    { title:"Proyectos destacados", subtitle:"Hasta 3 proyectos: academicos, personales o profesionales. Son tu mayor diferenciador si tienes poca experiencia.",
+      fields:[
+        { key:"project1Title", label:"Proyecto 1 — Nombre" },
+        { key:"project1Desc",  label:"Proyecto 1 — Descripcion breve", ml:true },
+        { key:"project2Title", label:"Proyecto 2 — Nombre (opcional)" },
+        { key:"project2Desc",  label:"Proyecto 2 — Descripcion breve (opcional)", ml:true },
+        { key:"project3Title", label:"Proyecto 3 — Nombre (opcional)" },
+        { key:"project3Desc",  label:"Proyecto 3 — Descripcion breve (opcional)", ml:true },
+      ]
+    },
+    { title:"Tu propuesta de valor", subtitle:"Que te hace diferente. Esta sera la base de cada carta de presentacion que generes.",
+      fields:[
+        { key:"strength", label:"Tu fortaleza principal o mensaje central", ml:true },
+        { key:"extra",    label:"Informacion adicional opcional (idiomas, certificaciones, disponibilidad)", ml:true },
+      ]
+    },
+  ];
+
+  const cur = steps[step];
+  const isLast = step === steps.length - 1;
+  const progress = Math.round((step / (steps.length - 1)) * 100);
+
+  const validate = () => {
+    if (step === 1 && (!p.name || !p.email)) { alert("Nombre y correo son requeridos."); return false; }
+    if (step === 2 && (!p.degree || !p.university)) { alert("Carrera y universidad son requeridas."); return false; }
+    return true;
+  };
+
+  const FI = ({ f }) => (
+    <div className="form-group" key={f.key} style={f.ml ? {} : {}}>
+      <label className="label">{f.label}</label>
+      {f.ml
+        ? <textarea className="textarea" style={{ minHeight:70 }} value={p[f.key]} onChange={set(f.key)} />
+        : <input className="input" value={p[f.key]} onChange={set(f.key)} />
+      }
+    </div>
+  );
+
+  return (
+    <div style={{ minHeight:"100vh", background:"var(--bg)", display:"flex", alignItems:"center", justifyContent:"center", padding:24 }}>
+      <div style={{ width:"100%", maxWidth:520 }}>
+        {step > 0 && (
+          <div style={{ marginBottom:24 }}>
+            <div style={{ display:"flex", justifyContent:"space-between", marginBottom:8 }}>
+              <span style={{ fontSize:12, fontWeight:500, color:"var(--text3)", fontFamily:"'DM Mono',monospace" }}>Paso {step} de {steps.length - 1}</span>
+              <span style={{ fontSize:12, fontWeight:600, color:"var(--accent)", fontFamily:"'DM Mono',monospace" }}>{progress}%</span>
+            </div>
+            <div className="progress-bar-track">
+              <div className="progress-bar-fill" style={{ width: progress+"%" }} />
+            </div>
+          </div>
+        )}
+
+        <div className="card fade-up" style={{ padding: 32 }}>
+          {cur.isIntro ? (
+            <div style={{ textAlign:"center" }}>
+              <div style={{ fontSize:13, fontWeight:600, color:"var(--accent)", letterSpacing:0.5, marginBottom:16, textTransform:"uppercase" }}>JobHunter</div>
+              <h1 style={{ fontSize:24, fontWeight:700, marginBottom:10, letterSpacing:-0.5, color:"var(--text)" }}>Encuentra tu proximo trabajo</h1>
+              <p style={{ color:"var(--text2)", fontSize:14, lineHeight:1.75, marginBottom:28 }}>
+                Tu asistente personal de busqueda de empleo. Genera cartas de presentacion personalizadas, analiza vacantes y organiza tus aplicaciones — todo desde un solo lugar.
+              </p>
+
+              <div style={{ background:"var(--surface2)", border:"1px solid var(--border)", borderRadius:10, padding:"16px 20px", marginBottom:28, textAlign:"left" }}>
+                <div style={{ fontSize:12, fontWeight:600, color:"var(--text2)", letterSpacing:0.5, marginBottom:10, textTransform:"uppercase" }}>Que incluye</div>
+                {[
+                  ["Cover letters personalizadas con IA", "Adaptadas a cada vacante en ingles o español"],
+                  ["Links directos a LinkedIn, Indeed, OCC y mas", "Busca en todas las plataformas con un clic"],
+                  ["Analisis automatico de vacantes", "Detecta requisitos y calcula tu compatibilidad"],
+                  ["Tracker de aplicaciones", "Nunca pierdas de vista tus candidaturas"],
+                ].map(([title, desc]) => (
+                  <div key={title} style={{ display:"flex", gap:10, marginBottom:8, alignItems:"flex-start" }}>
+                    <div style={{ width:6, height:6, borderRadius:"50%", background:"var(--accent)", marginTop:6, flexShrink:0 }} />
+                    <div>
+                      <div style={{ fontSize:13, fontWeight:500, color:"var(--text)" }}>{title}</div>
+                      <div style={{ fontSize:12, color:"var(--text3)" }}>{desc}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ marginBottom:20 }}>
+                <div style={{ fontSize:12, fontWeight:600, color:"var(--text2)", letterSpacing:0.5, marginBottom:12, textTransform:"uppercase", textAlign:"left" }}>Opcion rapida: sube tu CV</div>
+                <CVUpload onExtracted={extracted => { setP(f => ({ ...f, ...extracted })); }} isLoading={cvLoading} setIsLoading={setCvLoading} />
+              </div>
+
+              <button className="btn-primary" style={{ width:"100%", justifyContent:"center", fontSize:15, padding:"13px" }} onClick={() => setStep(1)}>
+                {Object.values(p).some(v => v) ? "Continuar con datos extraidos" : "Empezar — toma 2 minutos"}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+              <p style={{ textAlign:"center", color:"var(--text3)", fontSize:11, marginTop:14, fontFamily:"'DM Mono',monospace" }}>Tus datos se guardan solo en este navegador</p>
+            </div>
+          ) : (
+            <>
+              <h2 style={{ fontSize:20, fontWeight:700, marginBottom:6, letterSpacing:-0.3 }}>{cur.title}</h2>
+              <p style={{ color:"var(--text2)", fontSize:13, marginBottom:22, lineHeight:1.65 }}>{cur.subtitle}</p>
+              {cur.fields.map(f => <FI key={f.key} f={f} />)}
+              <div style={{ display:"flex", gap:10, marginTop:8 }}>
+                <button className="btn-secondary" style={{ flex:1, justifyContent:"center" }} onClick={() => setStep(s => s - 1)}>Atras</button>
+                {isLast
+                  ? <button className="btn-primary" style={{ flex:2, justifyContent:"center" }} onClick={() => { if (validate()) onComplete(p); }}>
+                      Guardar y empezar
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </button>
+                  : <button className="btn-primary" style={{ flex:2, justifyContent:"center" }} onClick={() => { if (validate()) setStep(s => s + 1); }}>
+                      Siguiente
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </button>
+                }
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── LETTER EDITOR + PDF ───────────────────────────────────────────────────────
+function LetterEditor({ text, onChange, company, position, cv, onSave }) {
+  const [editing, setEditing] = useState(false);
+  const [copyLabel, setCopyLabel] = useState("Copiar");
+  const [pdfLabel, setPdfLabel] = useState("Descargar PDF");
+
+  const handleCopy = () => {
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.style.cssText = "position:fixed;opacity:0";
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try { document.execCommand("copy"); setCopyLabel("Copiado"); setTimeout(() => setCopyLabel("Copiar"), 2000); } catch {}
+    document.body.removeChild(ta);
+  };
+
+  const downloadPDF = async () => {
+    setPdfLabel("Generando...");
+    try {
+      if (!window.jspdf) {
+        await new Promise((res, rej) => {
+          const s = document.createElement("script");
+          s.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+          s.onload = res; s.onerror = rej; document.head.appendChild(s);
+        });
+      }
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit:"mm", format:"a4" });
+      const mL=25, mR=25, mT=30, cW=160, pH=297, mB=28;
+      let y = mT;
+      const date = new Date().toLocaleDateString("es-MX", { year:"numeric", month:"long", day:"numeric" });
+
+      doc.setFont("helvetica","bold"); doc.setFontSize(15); doc.setTextColor(20,20,20);
+      doc.text(cv.name || "", mL, y); y += 7;
+
+      const contactParts = [cv.location, cv.email, cv.phone].filter(Boolean);
+      doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(110,110,110);
+      if (contactParts.length) doc.text(contactParts.join("  ·  "), mL, y);
+      y += 5;
+
+      doc.setDrawColor(26, 86, 219); doc.setLineWidth(0.4);
+      doc.line(mL, y, 210-mR, y); y += 10;
+
+      doc.setFontSize(10); doc.setTextColor(90,90,90);
+      doc.text(date, mL, y); y += 9;
+
+      if (company) {
+        doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(30,30,30);
+        doc.text("Hiring Manager", mL, y); y += 5;
+        doc.setFont("helvetica","normal"); doc.setTextColor(80,80,80);
+        doc.text(`${company}${position ? "  —  "+position : ""}`, mL, y); y += 10;
+      }
+
+      doc.setFont("helvetica","normal"); doc.setFontSize(11); doc.setTextColor(25,25,25);
+      for (const para of text.split(/\n\n+/)) {
+        if (!para.trim()) continue;
+        for (const line of doc.splitTextToSize(para.trim(), cW)) {
+          if (y + 6.5 > pH - mB) { doc.addPage(); y = mT; }
+          doc.text(line, mL, y); y += 6.5;
+        }
+        y += 4;
+      }
+      y += 7;
+      if (y + 20 > pH - mB) { doc.addPage(); y = mT; }
+      doc.setFontSize(10.5); doc.setTextColor(60,60,60); doc.text("Atentamente,", mL, y); y += 14;
+      doc.setFont("helvetica","bold"); doc.setFontSize(11); doc.setTextColor(20,20,20);
+      doc.text(cv.name || "", mL, y);
+
+      doc.save(`carta-${(company||"carta").toLowerCase().replace(/\s+/g,"-")}.pdf`);
+      setPdfLabel("Descargado");
+    } catch(e) { alert("Error al generar PDF: "+e.message); setPdfLabel("Descargar PDF"); return; }
+    setTimeout(() => setPdfLabel("Descargar PDF"), 3000);
+  };
+
+  if (!text) return null;
+  return (
+    <div style={{ marginTop:24 }} className="fade-up">
+      <hr className="divider" />
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:14, flexWrap:"wrap", gap:10 }}>
+        <div style={{ fontWeight:700, fontSize:15, color:"var(--text)" }}>
+          Cover Letter
+          {editing && <span style={{ marginLeft:10, fontSize:12, color:"var(--amber)", fontWeight:400 }}>— en edicion</span>}
+        </div>
+        <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+          <button className="btn-secondary" style={{ borderColor: editing ? "var(--amber)" : undefined, color: editing ? "var(--amber)" : undefined }} onClick={() => setEditing(!editing)}>{editing ? "Listo" : "Editar"}</button>
+          <button className="btn-secondary" onClick={handleCopy}>{copyLabel}</button>
+          {onSave && <button className="btn-secondary" onClick={onSave}>Guardar en tracker</button>}
+          <button className="btn-primary" onClick={downloadPDF}>
+            {pdfLabel === "Generando..." ? <><div className="spinner" />{pdfLabel}</> : pdfLabel}
+          </button>
+        </div>
+      </div>
+      {editing
+        ? <textarea className="textarea" style={{ minHeight:320, borderColor:"var(--amber)", boxShadow:"0 0 0 3px rgba(194,124,10,0.1)", resize:"vertical", fontSize:13, lineHeight:1.85 }} value={text} onChange={e => onChange(e.target.value)} autoFocus />
+        : <div className="output-box" style={{ minHeight:320, cursor:"pointer" }} onClick={() => setEditing(true)}>
+            {text}
+            <div style={{ marginTop:12, fontSize:11, color:"var(--text3)", fontFamily:"'DM Mono',monospace" }}>Haz clic para editar</div>
+          </div>
+      }
+    </div>
+  );
+}
+
+// ── COVER LETTER TAB ──────────────────────────────────────────────────────────
+function CoverLetterTab({ cv }) {
+  const [form, setForm] = useState({ company:"", position:"", location:"", companyType:"any", isAbroad:"no", lang:"en", keywords:"", extra:"" });
+  const [output, setOutput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const set = k => e => setForm(f => ({ ...f, [k]:e.target.value }));
+
+  const generate = async () => {
+    if (!form.company || !form.position) { alert("Por favor ingresa empresa y puesto."); return; }
+    setLoading(true); setOutput(""); setError("");
+    const projStr = cv.projects.length ? cv.projects.join("; ") : "N/A";
+    const prompt = form.lang === "en"
+      ? `Write a concise, powerful cover letter in English for ${cv.name} applying to ${form.position} at ${form.company}${form.location ? " in "+form.location : ""}.
+CANDIDATE: Degree: ${cv.degree}. Current: ${cv.current||"N/A"}. Projects: ${projStr}. Skills: ${cv.skills||"N/A"}.${cv.extra ? " Additional: "+cv.extra : ""}${form.isAbroad === "yes" ? " Will need visa sponsorship — frame as long-term commitment." : ""}
+COMPANY TYPE: ${form.companyType}${form.keywords ? "\nJOB KEYWORDS: "+form.keywords : ""}${form.extra ? "\nSPECIFIC DETAILS: "+form.extra : ""}
+CORE BRAND MESSAGE: ${cv.strength||"Efficiency and ability to deliver real results quickly."}
+FORMAT: 3-4 tight paragraphs. NOT "I am writing to apply". Strong specific hook. Emphasize core brand message. 250-300 words max. Confident tone. Return ONLY the letter text.`
+      : `Escribe una carta de presentacion en español para ${cv.name} aplicando a ${form.position} en ${form.company}${form.location ? " en "+form.location : ""}.
+CANDIDATO: Titulo: ${cv.degree}. Rol actual: ${cv.current||"N/A"}. Proyectos: ${projStr}. Skills: ${cv.skills||"N/A"}.${cv.extra ? " Adicional: "+cv.extra : ""}${form.isAbroad === "yes" ? " Necesitara visa — mencionar positivamente." : ""}
+TIPO DE EMPRESA: ${form.companyType}${form.keywords ? "\nKEYWORDS: "+form.keywords : ""}
+MENSAJE CENTRAL: ${cv.strength||"Eficiencia y capacidad de entregar resultados rapido."}
+FORMATO: 3-4 parrafos cortos. NO "Me dirijo a ustedes". Gancho fuerte. Enfatizar mensaje central. Max 300 palabras. Solo el texto de la carta.`;
+    try { setOutput(await callClaude(prompt)); }
+    catch(e) { setError("Error: "+e.message); }
+    setLoading(false);
+  };
+
+  return (
+    <div style={{ padding:"28px 0" }}>
+      <h2 style={{ fontSize:22, fontWeight:700, marginBottom:6, letterSpacing:-0.5 }}>Genera tu Cover Letter</h2>
+      <p style={{ color:"var(--text2)", fontSize:13, marginBottom:24, lineHeight:1.65 }}>La IA genera una carta personalizada usando tu perfil y la adapta a cada vacante especifica.</p>
+
+      <div className="tip-box">
+        Agrega las keywords exactas del job post — esto ayuda a pasar filtros automatizados (ATS) y hace que la carta suene especifica y relevante.
+      </div>
+
+      <div className="grid2" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:0 }}>
+        <div className="form-group">
+          <label className="label">Empresa</label>
+          <input className="input" value={form.company} onChange={set("company")} />
+        </div>
+        <div className="form-group">
+          <label className="label">Puesto al que aplicas</label>
+          <input className="input" value={form.position} onChange={set("position")} />
+        </div>
+        <div className="form-group">
+          <label className="label">Ubicacion</label>
+          <input className="input" value={form.location} onChange={set("location")} placeholder="Ciudad, pais o Remoto" />
+        </div>
+        <div className="form-group">
+          <label className="label">Tipo de empresa</label>
+          <select className="select" value={form.companyType} onChange={set("companyType")}>
+            <option value="any">General</option>
+            <option value="aerospace">Aeroespacial</option>
+            <option value="automotive">Automotriz / Manufactura</option>
+            <option value="tech">Tecnologia / Software</option>
+            <option value="startup">Startup</option>
+            <option value="defense">Defensa</option>
+            <option value="opex">Mejora Continua / OpEx</option>
+            <option value="research">Investigacion / Academia</option>
+            <option value="finance">Finanzas / Banca</option>
+            <option value="health">Salud / Farmaceutica</option>
+            <option value="retail">Retail / Comercio</option>
+            <option value="consulting">Consultoria</option>
+          </select>
+        </div>
+        <div className="form-group">
+          <label className="label">Idioma de la carta</label>
+          <select className="select" value={form.lang} onChange={set("lang")}>
+            <option value="en">Ingles</option>
+            <option value="es">Espanol</option>
+          </select>
+        </div>
+        <div className="form-group">
+          <label className="label">Necesitaras visa para este puesto</label>
+          <select className="select" value={form.isAbroad} onChange={set("isAbroad")}>
+            <option value="no">No</option>
+            <option value="yes">Si, necesitare sponsorship</option>
+          </select>
+        </div>
+        <div className="form-group" style={{ gridColumn:"span 2" }}>
+          <label className="label">Keywords del job post (copia del anuncio)</label>
+          <input className="input" value={form.keywords} onChange={set("keywords")} />
+        </div>
+        <div className="form-group" style={{ gridColumn:"span 2" }}>
+          <label className="label">Por que esta empresa te interesa (opcional)</label>
+          <textarea className="textarea" style={{ minHeight:60 }} value={form.extra} onChange={set("extra")} />
+        </div>
+      </div>
+
+      <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
+        <button className="btn-primary" onClick={generate} disabled={loading}>
+          {loading ? <><div className="spinner" />Generando...</> : "Generar Cover Letter"}
+        </button>
+        {output && <button className="btn-secondary" onClick={generate} disabled={loading}>Regenerar</button>}
+      </div>
+
+      {error && <div style={{ marginTop:14, color:"var(--red)", fontSize:13, padding:"10px 14px", background:"var(--red-bg)", borderRadius:8, border:"1px solid #fbd5d5" }}>{error}</div>}
+      {loading && <div className="output-box" style={{ marginTop:20, opacity:0.5 }}>Generando tu carta personalizada...</div>}
+      {!loading && output && <LetterEditor text={output} onChange={setOutput} company={form.company} position={form.position} cv={cv} />}
+    </div>
+  );
+}
+
+const CAREER_LABELS = {
+  aerospace:"Aeroespacial / Aeronautica", software:"Sistemas / Software / Datos",
+  automotive:"Automotriz / Manufactura", mechanical:"Ingenieria Mecanica",
+  electrical:"Electrica / Electronica", civil:"Ingenieria Civil",
+  chemical:"Quimica / Procesos", finance:"Finanzas / Contabilidad",
+  health:"Salud / Medicina / Farma", design:"Diseno / Comunicacion Visual",
+  marketing:"Marketing / Publicidad", law:"Derecho / Juridico",
+  education:"Educacion / Pedagogia", general:"General",
+};
+
+// ── JOB SEARCH TAB ────────────────────────────────────────────────────────────
+function JobSearchTab({ cv }) {
+  const [form, setForm] = useState({ role:"", location:cv.location||"", level:"entry", jobType:"fulltime", keywords:"" });
+  const [links, setLinks] = useState(null);
+  const set = k => e => setForm(f => ({ ...f, [k]:e.target.value }));
+
+  // Detectar carrera del usuario y permitir override manual
+  const rawDegree = cv.degree || "";
+  const rawSkills = cv.skills || "";
+  const detectedCategory = detectCareerCategory(rawDegree, rawSkills);
+  const [careerOverride, setCareerOverride] = useState(detectedCategory);
+
+  const generate = () => {
+    const rR = form.role.trim() || "Engineer";
+    const lR = form.location.trim() || "Mexico";
+    const kw = form.keywords.trim();
+    const fQ = encodeURIComponent(rR + (kw ? " "+kw : ""));
+    const rE = encodeURIComponent(rR), lE = encodeURIComponent(lR);
+    const liL = { entry:"&f_E=2", intern:"&f_E=1", mid:"&f_E=3", any:"" }[form.level];
+    const rem = form.jobType === "remote";
+    setLinks([
+      { name:"LinkedIn",      desc:"Networking y aplicaciones directas",    url:`https://www.linkedin.com/jobs/search/?keywords=${fQ}&location=${lE}${liL}${rem?"&f_WT=2":""}` },
+      { name:"Indeed Mexico", desc:"Mayor volumen de vacantes en Mexico",    url:`https://mx.indeed.com/jobs?q=${fQ}&l=${lE}${rem?"&remotejob=032b3046-06a3-4876-8dfd-474eb5e7ed11":""}` },
+      { name:"Indeed Global", desc:"Vacantes internacionales",              url:`https://www.indeed.com/jobs?q=${fQ}&l=${encodeURIComponent("Mexico")}` },
+      { name:"OCC Mundial",   desc:"Lider en Mexico para perfiles tecnicos", url:`https://www.occ.com.mx/empleos/de-${encodeURIComponent(rR.toLowerCase().replace(/ /g,"-"))}/en-${encodeURIComponent(lR.toLowerCase().replace(/ /g,"-"))}/` },
+      { name:"Glassdoor",     desc:"Ver salarios y opiniones de empresas",   url:`https://www.glassdoor.com/Job/jobs.htm?sc.keyword=${fQ}` },
+      { name:"Computrabajo",  desc:"Alternativa fuerte en Mexico",           url:`https://www.computrabajo.com.mx/trabajo-de-${encodeURIComponent(rR.toLowerCase().replace(/ /g,"+"))}` },
+      { name:"Zona Jobs",     desc:"Portal de empleo especializado MX",      url:`https://www.zonajobs.com.mx/empleos-de-${encodeURIComponent(rR.toLowerCase().replace(/ /g,"-"))}.html` },
+      { name:"El Universal Empleos", desc:"Empleos en diario nacional MX",  url:`https://empleos.eluniversal.com.mx/empleos/${encodeURIComponent(rR.toLowerCase().replace(/ /g,"-"))}/` },
+    ]);
+  };
+
+  const companyList = CAREER_COMPANIES[careerOverride] || CAREER_COMPANIES.general;
+
+  return (
+    <div style={{ padding:"28px 0" }}>
+      <h2 style={{ fontSize:22, fontWeight:700, marginBottom:6, letterSpacing:-0.5 }}>Generador de Busquedas</h2>
+      <p style={{ color:"var(--text2)", fontSize:13, marginBottom:24, lineHeight:1.65 }}>Genera links optimizados para multiples plataformas con un clic. Las empresas sugeridas se adaptan a tu area profesional.</p>
+
+      <div className="tip-box">
+        Flujo recomendado: genera links → abre las vacantes → copia el texto → pegalas en "Analizar Vacante" para obtener una cover letter personalizada.
+      </div>
+
+      <div className="grid2" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16 }}>
+        <div className="form-group">
+          <label className="label">Puesto que buscas</label>
+          <input className="input" value={form.role} onChange={set("role")} />
+        </div>
+        <div className="form-group">
+          <label className="label">Ubicacion preferida</label>
+          <input className="input" value={form.location} onChange={set("location")} />
+        </div>
+        <div className="form-group">
+          <label className="label">Nivel de experiencia</label>
+          <select className="select" value={form.level} onChange={set("level")}>
+            <option value="entry">Entry Level / Junior</option>
+            <option value="intern">Internship / Practicante</option>
+            <option value="mid">Mid Level</option>
+            <option value="any">Cualquiera</option>
+          </select>
+        </div>
+        <div className="form-group">
+          <label className="label">Tipo de trabajo</label>
+          <select className="select" value={form.jobType} onChange={set("jobType")}>
+            <option value="fulltime">Tiempo completo</option>
+            <option value="remote">Remoto</option>
+            <option value="parttime">Medio tiempo</option>
+            <option value="any">Cualquiera</option>
+          </select>
+        </div>
+        <div className="form-group" style={{ gridColumn:"span 2" }}>
+          <label className="label">Keywords adicionales</label>
+          <input className="input" value={form.keywords} onChange={set("keywords")} />
+        </div>
+      </div>
+
+      <button className="btn-primary" onClick={generate}>Generar links de busqueda</button>
+
+      {links && (
+        <div className="fade-up">
+          <hr className="divider" />
+          <div style={{ fontWeight:700, fontSize:15, marginBottom:14, color:"var(--text)" }}>Plataformas de empleo</div>
+          <div className="grid2" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:28 }}>
+            {links.map(p => (
+              <a key={p.name} href={p.url} target="_blank" rel="noopener noreferrer">
+                <div className="link-card">
+                  <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:4 }}>
+                    <span style={{ fontWeight:600, fontSize:13.5, color:"var(--text)" }}>{p.name}</span>
+                    <span style={{ color:"var(--accent)", fontSize:13 }}>↗</span>
+                  </div>
+                  <div style={{ fontSize:12, color:"var(--text3)" }}>{p.desc}</div>
+                </div>
+              </a>
+            ))}
+          </div>
+
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:10, marginBottom:14 }}>
+            <div style={{ fontWeight:700, fontSize:15, color:"var(--text)" }}>Empresas sugeridas para tu area</div>
+            <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+              <span style={{ fontSize:12, color:"var(--text3)" }}>Area detectada:</span>
+              <select className="select" style={{ width:"auto", fontSize:12, padding:"5px 28px 5px 10px" }} value={careerOverride} onChange={e => setCareerOverride(e.target.value)}>
+                {Object.entries(CAREER_LABELS).map(([k,v]) => <option key={k} value={k}>{v}</option>)}
+              </select>
+            </div>
+          </div>
+          <div className="grid2" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
+            {companyList.map(c => (
+              <a key={c.name} href={c.url} target="_blank" rel="noopener noreferrer">
+                <div className="link-card" style={{ display:"flex", alignItems:"center", gap:14 }}>
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontWeight:600, fontSize:13.5, color:"var(--text)", marginBottom:2 }}>{c.name}</div>
+                    <div style={{ fontSize:12, color:"var(--text3)" }}>{c.note}</div>
+                  </div>
+                  <span style={{ color:"var(--accent)", fontSize:13 }}>↗</span>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── ANALYZER TAB ──────────────────────────────────────────────────────────────
+function AnalyzerTab({ cv, onSave }) {
+  const [jobText, setJobText] = useState("");
+  const [lang, setLang] = useState("en");
+  const [visa, setVisa] = useState("no");
+  const [loading, setLoading] = useState(false);
+  const [summary, setSummary] = useState(null);
+  const [letter, setLetter] = useState("");
+  const [error, setError] = useState("");
+
+  const analyze = async () => {
+    if (!jobText || jobText.length < 40) { alert("Por favor pega el texto completo de la vacante."); return; }
+    setLoading(true); setSummary(null); setLetter(""); setError("");
+    const projStr = cv.projects.length ? cv.projects.join("; ") : "N/A";
+    const prompt = `Analyze this job posting and write a cover letter for ${cv.name}.
+JOB POSTING:\n---\n${jobText.substring(0,3000)}\n---
+CANDIDATE: ${cv.degree}. Current: ${cv.current||"N/A"}. Projects: ${projStr}. Skills: ${cv.skills||"N/A"}.${visa==="yes"?" Needs visa sponsorship — frame as long-term commitment.":""}
+CORE BRAND MESSAGE: ${cv.strength||"Efficiency — delivers results faster, ramps up quickly."}
+First output JSON (no text before):
+<<<JSON>>>
+{"company":"...","position":"...","location":"...","key_requirements":["r1","r2","r3"],"match_score":85,"match_notes":"brief"}
+<<<END>>>
+Then write cover letter in ${lang==="en"?"English":"Spanish"}: 3-4 paragraphs, strong hook (NOT "I am writing"), mirror job keywords, emphasize brand message${visa==="yes"?", mention relocation positively":""}, max 300 words, confident CTA.`;
+    try {
+      const full = await callClaude(prompt);
+      const m = full.match(/<<<JSON>>>([\s\S]*?)<<<END>>>/);
+      if (m) { try { setSummary(JSON.parse(m[1].trim())); } catch {} }
+      setLetter(full.replace(/<<<JSON>>>[\s\S]*?<<<END>>>/, "").trim());
+    } catch(e) { setError("Error: "+e.message); }
+    setLoading(false);
+  };
+
+  return (
+    <div style={{ padding:"28px 0" }}>
+      <h2 style={{ fontSize:22, fontWeight:700, marginBottom:6, letterSpacing:-0.5 }}>Analizar Vacante y Generar Carta</h2>
+      <p style={{ color:"var(--text2)", fontSize:13, marginBottom:24, lineHeight:1.65 }}>Pega el texto de cualquier vacante y la IA detecta los requisitos clave, calcula tu compatibilidad y genera tu carta personalizada.</p>
+
+      <div className="tip-box">
+        Abre la vacante en tu navegador, selecciona todo el texto (Ctrl+A), copialo (Ctrl+C) y pegalos aqui. Cuanto mas texto incluyas, mejor sera el analisis.
+      </div>
+
+      <div className="form-group">
+        <label className="label">Texto de la vacante</label>
+        <textarea className="textarea" style={{ minHeight:200 }} value={jobText} onChange={e => setJobText(e.target.value)} placeholder="Pega aqui el texto completo de la vacante..." />
+      </div>
+
+      <div className="grid2" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:16 }}>
+        <div className="form-group" style={{ marginBottom:0 }}>
+          <label className="label">Idioma de la carta</label>
+          <select className="select" value={lang} onChange={e => setLang(e.target.value)}>
+            <option value="en">Ingles</option>
+            <option value="es">Espanol</option>
+          </select>
+        </div>
+        <div className="form-group" style={{ marginBottom:0 }}>
+          <label className="label">Necesitaras visa</label>
+          <select className="select" value={visa} onChange={e => setVisa(e.target.value)}>
+            <option value="no">No</option>
+            <option value="yes">Si, necesitare sponsorship</option>
+          </select>
+        </div>
+      </div>
+
+      <button className="btn-primary" onClick={analyze} disabled={loading}>
+        {loading ? <><div className="spinner" />Analizando...</> : "Analizar y Generar Carta"}
+      </button>
+
+      {error && <div style={{ marginTop:14, color:"var(--red)", fontSize:13, padding:"10px 14px", background:"var(--red-bg)", borderRadius:8, border:"1px solid #fbd5d5" }}>{error}</div>}
+
+      {summary && (
+        <div className="card fade-up" style={{ marginTop:20 }}>
+          <div style={{ fontSize:11, fontWeight:600, color:"var(--text3)", letterSpacing:0.5, textTransform:"uppercase", marginBottom:12 }}>Vacante detectada</div>
+          <div style={{ fontWeight:700, fontSize:15, marginBottom:4, color:"var(--text)" }}>{summary.company} — {summary.position}</div>
+          {summary.location && <div style={{ fontSize:13, color:"var(--text2)", marginBottom:12 }}>{summary.location}</div>}
+          <div style={{ fontSize:12, fontWeight:600, color:"var(--text2)", marginBottom:8, textTransform:"uppercase", letterSpacing:0.4 }}>Requisitos clave</div>
+          <div style={{ marginBottom:14 }}>
+            {(summary.key_requirements||[]).map((r,i) => (
+              <div key={i} style={{ display:"flex", gap:8, alignItems:"flex-start", marginBottom:5 }}>
+                <div style={{ width:5, height:5, borderRadius:"50%", background:"var(--text3)", marginTop:7, flexShrink:0 }} />
+                <span style={{ fontSize:13, color:"var(--text2)" }}>{r}</span>
+              </div>
+            ))}
+          </div>
+          {summary.match_score && (
+            <div style={{ display:"flex", alignItems:"center", gap:12, padding:"12px 16px", background:"var(--surface2)", borderRadius:8 }}>
+              <div style={{ fontSize:24, fontWeight:700, color: summary.match_score >= 70 ? "var(--green)" : summary.match_score >= 50 ? "var(--amber)" : "var(--red)", fontFamily:"'DM Mono',monospace" }}>
+                {summary.match_score}%
+              </div>
+              <div>
+                <div style={{ fontSize:12, fontWeight:600, color:"var(--text2)", marginBottom:2 }}>Compatibilidad con tu perfil</div>
+                <div style={{ fontSize:12, color:"var(--text3)" }}>{summary.match_notes}</div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {loading && <div className="output-box" style={{ opacity:0.5, marginTop:16 }}>Analizando vacante y generando carta...</div>}
+      {!loading && letter && <LetterEditor text={letter} onChange={setLetter} company={summary?.company} position={summary?.position} cv={cv} onSave={summary ? () => onSave({ company:summary.company, position:summary.position, letter }) : null} />}
+    </div>
+  );
+}
+
+// ── TRACKER TAB ───────────────────────────────────────────────────────────────
+function TrackerTab({ apps, onAdd, onUpdate, onDelete }) {
+  const [form, setForm] = useState({ company:"", position:"", date:new Date().toISOString().split("T")[0], status:"applied", notes:"" });
+  const [showForm, setShowForm] = useState(false);
+  const set = k => e => setForm(f => ({ ...f, [k]:e.target.value }));
+
+  const add = () => {
+    if (!form.company || !form.position) { alert("Empresa y puesto son requeridos."); return; }
+    onAdd({ ...form, id:Date.now() });
+    setForm({ company:"", position:"", date:new Date().toISOString().split("T")[0], status:"applied", notes:"" });
+    setShowForm(false);
+  };
+
+  const total = apps.length;
+  const applied = apps.filter(a => a.status === "applied").length;
+  const interview = apps.filter(a => a.status === "interview").length;
+  const rate = total > 0 ? Math.round((interview / total) * 100) : 0;
+
+  return (
+    <div style={{ padding:"28px 0" }}>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:6, flexWrap:"wrap", gap:10 }}>
+        <h2 style={{ fontSize:22, fontWeight:700, letterSpacing:-0.5 }}>Mis Aplicaciones</h2>
+        <button className="btn-primary" onClick={() => setShowForm(v => !v)}>
+          {showForm ? "Cancelar" : "+ Agregar aplicacion"}
+        </button>
+      </div>
+      <p style={{ color:"var(--text2)", fontSize:13, marginBottom:24, lineHeight:1.65 }}>Registra cada aplicacion y da seguimiento a tu proceso.</p>
+
+      <div className="grid4" style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:12, marginBottom:24 }}>
+        {[["Total enviadas", total, "var(--text)"], ["Pendientes", applied, "var(--accent)"], ["Entrevistas", interview, "#c27c0a"], ["Tasa de respuesta", rate+"%", rate >= 20 ? "var(--green)" : "var(--red)"]].map(([label, val, color]) => (
+          <div key={label} className="card" style={{ textAlign:"center", padding:"16px 12px" }}>
+            <div style={{ fontSize:26, fontWeight:700, color, fontFamily:"'DM Mono',monospace", marginBottom:4 }}>{val}</div>
+            <div style={{ fontSize:11, color:"var(--text3)", fontWeight:500, letterSpacing:0.3, textTransform:"uppercase" }}>{label}</div>
+          </div>
+        ))}
+      </div>
+
+      {showForm && (
+        <div className="card fade-up" style={{ marginBottom:20 }}>
+          <div style={{ fontSize:12, fontWeight:600, color:"var(--text2)", letterSpacing:0.5, textTransform:"uppercase", marginBottom:16 }}>Nueva aplicacion</div>
+          <div className="grid2" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16 }}>
+            <div className="form-group"><label className="label">Empresa</label><input className="input" value={form.company} onChange={set("company")} /></div>
+            <div className="form-group"><label className="label">Puesto</label><input className="input" value={form.position} onChange={set("position")} /></div>
+            <div className="form-group"><label className="label">Fecha</label><input type="date" className="input" value={form.date} onChange={set("date")} /></div>
+            <div className="form-group">
+              <label className="label">Estado</label>
+              <select className="select" value={form.status} onChange={set("status")}>
+                {Object.entries(STATUS_LABELS).map(([v,l]) => <option key={v} value={v}>{l}</option>)}
+              </select>
+            </div>
+            <div className="form-group" style={{ gridColumn:"span 2" }}>
+              <label className="label">Notas</label>
+              <textarea className="textarea" style={{ minHeight:50 }} value={form.notes} onChange={set("notes")} placeholder="Link de la vacante, nombre del reclutador, proximos pasos..." />
+            </div>
+          </div>
+          <button className="btn-primary" onClick={add}>Guardar aplicacion</button>
+        </div>
+      )}
+
+      {apps.length === 0
+        ? <div className="card" style={{ textAlign:"center", padding:"48px 20px", color:"var(--text3)" }}>
+            <div style={{ fontSize:14, marginBottom:6 }}>No tienes aplicaciones registradas todavia</div>
+            <div style={{ fontSize:12 }}>Agrega tu primera aplicacion usando el boton de arriba</div>
+          </div>
+        : <div className="card" style={{ padding:0, overflow:"hidden" }}>
+            <table style={{ width:"100%", borderCollapse:"collapse" }}>
+              <thead>
+                <tr style={{ background:"var(--surface2)" }}>
+                  {["Empresa","Puesto","Fecha","Estado","Notas",""].map(h => (
+                    <th key={h} style={{ padding:"10px 16px", textAlign:"left", fontSize:11, fontWeight:600, color:"var(--text3)", letterSpacing:0.5, textTransform:"uppercase", borderBottom:"1px solid var(--border)" }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {apps.map(app => {
+                  const sc = STATUS_STYLES[app.status] || STATUS_STYLES.saved;
+                  return (
+                    <tr key={app.id} style={{ borderBottom:"1px solid var(--border)" }}>
+                      <td style={{ padding:"12px 16px", fontWeight:600, fontSize:14, color:"var(--text)" }}>{app.company}</td>
+                      <td style={{ padding:"12px 16px", fontSize:13, color:"var(--text2)" }}>{app.position}</td>
+                      <td style={{ padding:"12px 16px", fontFamily:"'DM Mono',monospace", fontSize:11, color:"var(--text3)" }}>{app.date}</td>
+                      <td style={{ padding:"12px 16px" }}>
+                        <select value={app.status} onChange={e => onUpdate(app.id, e.target.value)} style={{ background:sc.bg, border:`1px solid ${sc.border}`, color:sc.color, borderRadius:99, padding:"4px 12px", fontSize:11, fontWeight:600, cursor:"pointer", fontFamily:"'DM Sans',sans-serif", WebkitAppearance:"none" }}>
+                          {Object.entries(STATUS_LABELS).map(([v,l]) => <option key={v} value={v}>{l}</option>)}
+                        </select>
+                      </td>
+                      <td style={{ padding:"12px 16px", fontSize:12, color:"var(--text3)", maxWidth:160, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{app.notes || "—"}</td>
+                      <td style={{ padding:"12px 16px" }}>
+                        <button className="btn-danger" style={{ padding:"5px 12px", fontSize:12 }} onClick={() => onDelete(app.id)}>Eliminar</button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+      }
+    </div>
+  );
+}
+
+// ── STRATEGY TAB ──────────────────────────────────────────────────────────────
+function StrategyTab({ cv }) {
+  const strength = cv.strength || "Capacidad de entregar resultados reales rapidamente.";
+  return (
+    <div style={{ padding:"28px 0" }}>
+      <h2 style={{ fontSize:22, fontWeight:700, marginBottom:6, letterSpacing:-0.5 }}>Estrategia de Busqueda</h2>
+      <p style={{ color:"var(--text2)", fontSize:13, marginBottom:24, lineHeight:1.65 }}>Una guia practica para maximizar tus posibilidades con un enfoque sistematico y eficiente.</p>
+
+      <div style={{ background:"var(--surface2)", border:"1px solid var(--border)", borderRadius:10, padding:"16px 20px", marginBottom:24 }}>
+        <div style={{ fontSize:11, fontWeight:600, color:"var(--text3)", letterSpacing:0.5, textTransform:"uppercase", marginBottom:8 }}>Tu propuesta de valor</div>
+        <div style={{ fontSize:14, color:"var(--text)", lineHeight:1.7 }}>{strength}</div>
+        <div style={{ fontSize:11, color:"var(--text3)", marginTop:6 }}>Editable en "Mi Perfil".</div>
+      </div>
+
+      <div className="grid2" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16 }}>
+        {[
+          { title:"Empleo en Mexico", items:[
+            "OCC Mundial es el mas robusto para ingenieria y manufactura",
+            "LinkedIn Jobs: filtra por ciudad y nivel",
+            "Indeed MX y Computrabajo como alternativas",
+            "Paginas de carrera directas de empresas target",
+            "Personaliza CADA aplicacion, no mandes el mismo CV a todos",
+            "Cuantifica logros en tu CV: X% de mejora, reduccion de Y tiempo",
+            "Usa las keywords exactas del job post para pasar filtros ATS",
+          ]},
+          { title:"Oportunidades en el extranjero", items:[
+            "Airbus (Francia y España) tiene programas Early Career",
+            "SAFRAN Group esta abierto a talento latinoamericano",
+            "Collins Aerospace: operaciones en EU y Europa",
+            "Embraer en Brasil, sin complicaciones de visa",
+            "España: ventaja cultural y de idioma para latinos",
+            "Canada: Express Entry para ingenieros es viable",
+            "Mencionar disponibilidad de reubicacion como fortaleza",
+          ]},
+          { title:"Optimiza tu CV", items:[
+            "ATS-proof: usa exactamente las palabras del job post",
+            "Cuantifica todo: Reduci X en Y%, Aumenté eficiencia en Z%",
+            "Pon tus proyectos al inicio — son tu mayor activo",
+            "Portafolio en GitHub o Notion es un diferenciador fuerte",
+            "LinkedIn completo con foto profesional y proyectos destacados",
+            "CV de 1 pagina si tienes menos de 5 anos de experiencia",
+          ]},
+          { title:"Meta semanal recomendada", items:[
+            "5 aplicaciones por semana como minimo",
+            "1 alcanzable: empresa aspiracional o soñada",
+            "2 ideales: encajan bien con tu perfil",
+            "2 seguras: vacantes locales o con alta probabilidad",
+            "Personaliza CADA cover letter con el analizador",
+            "Follow-up a los 7 dias sin respuesta",
+            "Conecta con el hiring manager en LinkedIn antes de aplicar",
+          ]},
+        ].map(block => (
+          <div key={block.title} className="card">
+            <div style={{ fontWeight:700, fontSize:14, marginBottom:14, color:"var(--text)" }}>{block.title}</div>
+            <div>
+              {block.items.map((line, i) => (
+                <div key={i} style={{ display:"flex", gap:10, alignItems:"flex-start", marginBottom:8 }}>
+                  <div style={{ width:5, height:5, borderRadius:"50%", background:"var(--accent)", marginTop:8, flexShrink:0 }} />
+                  <span style={{ fontSize:13, color:"var(--text2)", lineHeight:1.6 }}>{line}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── IMAGE JOB TAB ─────────────────────────────────────────────────────────────
+function ImageJobTab({ cv }) {
+  const [imageData, setImageData] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [jobInfo, setJobInfo] = useState(null);
+  const [email, setEmail] = useState("");
+  const [lang, setLang] = useState("es");
+  const [editingEmail, setEditingEmail] = useState(false);
+  const [copyLabel, setCopyLabel] = useState("Copiar correo");
+  const [error, setError] = useState("");
+  const [dragOver, setDragOver] = useState(false);
+
+  const handleImageFile = (file) => {
+    if (!file || !file.type.startsWith("image/")) { alert("Por favor sube una imagen (JPG, PNG, etc)."); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setImagePreview(e.target.result);
+      setImageData({ base64: e.target.result.split(",")[1], mediaType: file.type });
+      setJobInfo(null); setEmail(""); setError("");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const analyze = async () => {
+    if (!imageData) { alert("Primero sube la imagen de la vacante."); return; }
+    setLoading(true); setJobInfo(null); setEmail(""); setError("");
+    const projStr = cv.projects.length ? cv.projects.join("; ") : "N/A";
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json", "x-api-key":ANTHROPIC_API_KEY, "anthropic-version":"2023-06-01" },
+        body: JSON.stringify({
+          model:"claude-sonnet-4-20250514",
+          max_tokens:1500,
+          messages:[{
+            role:"user",
+            content:[
+              { type:"image", source:{ type:"base64", media_type: imageData.mediaType, data: imageData.base64 } },
+              { type:"text", text:`This is a job posting image. Extract all information and write a professional application email.
+
+CANDIDATE: ${cv.name}. ${cv.degree}. Current: ${cv.current||"N/A"}. Projects: ${projStr}. Skills: ${cv.skills||"N/A"}. Strength: ${cv.strength||"Efficiency and quick results."}.${cv.extra ? " Extra: "+cv.extra : ""}
+
+First output JSON only (no text before or after):
+<<<JSON>>>
+{"company":"...","position":"...","contact_email":"...or empty if not visible","location":"...","requirements":["req1","req2","req3"]}
+<<<END>>>
+
+Then write a professional application email in ${lang==="es"?"Spanish":"English"}.
+Email format:
+- Subject line first (prefix with "Subject: ")
+- Blank line
+- Body: professional, 3 paragraphs, strong opening, highlight relevant skills/projects, confident closing
+- Do NOT include email address fields like To/From
+- Max 250 words
+- Return ONLY the email text after the JSON block` }
+            ]
+          }]
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error?.message || "Error de API");
+      const full = data.content?.map(b => b.text||"").join("") || "";
+      const m = full.match(/<<<JSON>>>([\s\S]*?)<<<END>>>/);
+      if (m) { try { setJobInfo(JSON.parse(m[1].trim())); } catch {} }
+      setEmail(full.replace(/<<<JSON>>>[\s\S]*?<<<END>>>/, "").trim());
+    } catch(e) { setError("Error: "+e.message); }
+    setLoading(false);
+  };
+
+  const handleCopy = () => {
+    const ta = document.createElement("textarea");
+    ta.value = email; ta.style.cssText = "position:fixed;opacity:0";
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try { document.execCommand("copy"); setCopyLabel("Copiado"); setTimeout(() => setCopyLabel("Copiar correo"), 2000); } catch {}
+    document.body.removeChild(ta);
+  };
+
+  return (
+    <div style={{ padding:"28px 0" }}>
+      <h2 style={{ fontSize:22, fontWeight:700, marginBottom:6, letterSpacing:-0.5 }}>Vacante en Imagen → Correo de Postulacion</h2>
+      <p style={{ color:"var(--text2)", fontSize:13, marginBottom:24, lineHeight:1.65 }}>Sube la foto o captura de pantalla de una vacante y la IA extrae la informacion y genera tu correo de postulacion listo para enviar.</p>
+
+      <div className="tip-box">
+        Ideal para vacantes publicadas en Instagram, WhatsApp, carteles o capturas de pantalla. La IA lee el texto de la imagen automaticamente.
+      </div>
+
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:16 }} className="grid2">
+        <div className="form-group" style={{ marginBottom:0 }}>
+          <label className="label">Idioma del correo</label>
+          <select className="select" value={lang} onChange={e => setLang(e.target.value)}>
+            <option value="es">Espanol</option>
+            <option value="en">Ingles</option>
+          </select>
+        </div>
+      </div>
+
+      <div
+        className={`upload-zone${dragOver ? " drag-over" : ""}`}
+        style={{ marginBottom:16 }}
+        onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={e => { e.preventDefault(); setDragOver(false); handleImageFile(e.dataTransfer.files?.[0]); }}
+      >
+        <input type="file" accept="image/*" onChange={e => handleImageFile(e.target.files?.[0])} />
+        {imagePreview ? (
+          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:10 }}>
+            <img src={imagePreview} alt="Vacante" style={{ maxHeight:200, maxWidth:"100%", borderRadius:8, objectFit:"contain" }} />
+            <div style={{ fontSize:12, color:"var(--text3)" }}>Imagen cargada — haz clic para cambiarla</div>
+          </div>
+        ) : (
+          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:8 }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+            </svg>
+            <div style={{ fontSize:14, fontWeight:500, color:"var(--text)" }}>Sube la imagen de la vacante</div>
+            <div style={{ fontSize:12, color:"var(--text3)" }}>JPG, PNG, captura de pantalla, foto del cartel</div>
+          </div>
+        )}
+      </div>
+
+      <button className="btn-primary" onClick={analyze} disabled={loading || !imageData}>
+        {loading ? <><div className="spinner" />Analizando imagen...</> : "Analizar y Generar Correo"}
+      </button>
+
+      {error && <div style={{ marginTop:14, color:"var(--red)", fontSize:13, padding:"10px 14px", background:"var(--red-bg)", borderRadius:8, border:"1px solid #fbd5d5" }}>{error}</div>}
+
+      {jobInfo && (
+        <div className="card fade-up" style={{ marginTop:20 }}>
+          <div style={{ fontSize:11, fontWeight:600, color:"var(--text3)", letterSpacing:0.5, textTransform:"uppercase", marginBottom:12 }}>Informacion detectada</div>
+          <div style={{ fontWeight:700, fontSize:15, marginBottom:4 }}>{jobInfo.company || "Empresa no detectada"}{jobInfo.position ? " — "+jobInfo.position : ""}</div>
+          {jobInfo.location && <div style={{ fontSize:13, color:"var(--text2)", marginBottom:8 }}>{jobInfo.location}</div>}
+          {jobInfo.contact_email && (
+            <div style={{ display:"flex", alignItems:"center", gap:8, padding:"8px 12px", background:"var(--accent-bg)", border:"1px solid var(--accent-border)", borderRadius:8, marginBottom:8 }}>
+              <span style={{ fontSize:12, color:"var(--text2)" }}>Enviar a:</span>
+              <span style={{ fontSize:13, fontWeight:600, color:"var(--accent)", fontFamily:"'DM Mono',monospace" }}>{jobInfo.contact_email}</span>
+            </div>
+          )}
+          {jobInfo.requirements?.length > 0 && (
+            <div style={{ marginTop:8 }}>
+              <div style={{ fontSize:11, fontWeight:600, color:"var(--text3)", marginBottom:6, textTransform:"uppercase", letterSpacing:0.4 }}>Requisitos detectados</div>
+              {jobInfo.requirements.map((r,i) => (
+                <div key={i} style={{ display:"flex", gap:8, alignItems:"flex-start", marginBottom:4 }}>
+                  <div style={{ width:5, height:5, borderRadius:"50%", background:"var(--text3)", marginTop:7, flexShrink:0 }} />
+                  <span style={{ fontSize:13, color:"var(--text2)" }}>{r}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {email && (
+        <div className="fade-up" style={{ marginTop:20 }}>
+          <hr className="divider" />
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:14, flexWrap:"wrap", gap:10 }}>
+            <div style={{ fontWeight:700, fontSize:15 }}>
+              Correo generado
+              {editingEmail && <span style={{ marginLeft:10, fontSize:12, color:"var(--amber)", fontWeight:400 }}>— en edicion</span>}
+            </div>
+            <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+              <button className="btn-secondary" style={{ borderColor: editingEmail ? "var(--amber)" : undefined, color: editingEmail ? "var(--amber)" : undefined }} onClick={() => setEditingEmail(v => !v)}>{editingEmail ? "Listo" : "Editar"}</button>
+              <button className="btn-primary" onClick={handleCopy}>{copyLabel}</button>
+            </div>
+          </div>
+          {editingEmail
+            ? <textarea className="textarea" style={{ minHeight:280, borderColor:"var(--amber)", boxShadow:"0 0 0 3px rgba(194,124,10,0.1)", fontSize:13, lineHeight:1.85 }} value={email} onChange={e => setEmail(e.target.value)} autoFocus />
+            : <div className="output-box" style={{ minHeight:280, cursor:"pointer" }} onClick={() => setEditingEmail(true)}>
+                {email}
+                <div style={{ marginTop:12, fontSize:11, color:"var(--text3)", fontFamily:"'DM Mono',monospace" }}>Haz clic para editar</div>
+              </div>
+          }
+          {jobInfo?.contact_email && (
+            <div style={{ marginTop:12, padding:"10px 14px", background:"var(--green-bg)", border:"1px solid #a7f3d0", borderRadius:8, fontSize:13, color:"var(--green)" }}>
+              Recuerda enviar este correo a: <strong style={{ fontFamily:"'DM Mono',monospace" }}>{jobInfo.contact_email}</strong>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── PROFILE TAB ───────────────────────────────────────────────────────────────
+function ProfileTab({ profile, onUpdate, onReset }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(profile);
+  const [cvLoading, setCvLoading] = useState(false);
+  const [photo, setPhoto] = useState(() => { try { return localStorage.getItem("jh_photo") || null; } catch { return null; } });
+  const set = k => e => setDraft(f => ({ ...f, [k]:e.target.value }));
+  const save = () => { onUpdate(draft); setEditing(false); };
+  const cancel = () => { setDraft(profile); setEditing(false); };
+
+  const handlePhoto = (file) => {
+    if (!file || !file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setPhoto(e.target.result);
+      try { localStorage.setItem("jh_photo", e.target.result); } catch {}
+    };
+    reader.readAsDataURL(file);
+  };
+  const removePhoto = () => { setPhoto(null); try { localStorage.removeItem("jh_photo"); } catch {} };
+
+  const sections = [
+    { title:"Informacion Personal", keys:[
+      { key:"name", label:"Nombre completo" }, { key:"email", label:"Correo electronico" },
+      { key:"phone", label:"Telefono" }, { key:"location", label:"Ciudad, Estado, Pais" },
+    ]},
+    { title:"Educacion", keys:[
+      { key:"degree", label:"Carrera o titulo" }, { key:"university", label:"Universidad" }, { key:"gradYear", label:"Año de graduacion" },
+    ]},
+    { title:"Experiencia", keys:[
+      { key:"currentJob", label:"Puesto actual o mas reciente" }, { key:"currentCompany", label:"Empresa u organizacion" },
+    ]},
+    { title:"Habilidades", keys:[{ key:"skills", label:"Habilidades tecnicas y herramientas", ml:true }]},
+    { title:"Proyectos", keys:[
+      { key:"project1Title", label:"Proyecto 1 — Nombre" }, { key:"project1Desc", label:"Proyecto 1 — Descripcion", ml:true },
+      { key:"project2Title", label:"Proyecto 2 — Nombre" }, { key:"project2Desc", label:"Proyecto 2 — Descripcion", ml:true },
+      { key:"project3Title", label:"Proyecto 3 — Nombre" }, { key:"project3Desc", label:"Proyecto 3 — Descripcion", ml:true },
+    ]},
+    { title:"Propuesta de Valor", keys:[
+      { key:"strength", label:"Tu fortaleza principal", ml:true },
+      { key:"extra", label:"Informacion adicional", ml:true },
+    ]},
+  ];
+
+  return (
+    <div style={{ padding:"28px 0" }}>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:6, flexWrap:"wrap", gap:10 }}>
+        <h2 style={{ fontSize:22, fontWeight:700, letterSpacing:-0.5 }}>Mi Perfil</h2>
+        <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+          {editing
+            ? <><button className="btn-secondary" onClick={cancel}>Cancelar</button><button className="btn-primary" onClick={save}>Guardar cambios</button></>
+            : <><button className="btn-secondary" onClick={() => { setDraft(profile); setEditing(true); }}>Editar perfil</button>
+                 <button className="btn-danger" onClick={() => { if(window.confirm("Esto borrara todos tus datos. Continuar?")) onReset(); }}>Reiniciar app</button></>
+          }
+        </div>
+      </div>
+      <p style={{ color:"var(--text2)", fontSize:13, marginBottom:24, lineHeight:1.65 }}>Esta informacion se usa en todas tus cover letters y documentos generados.</p>
+
+      {editing && (
+        <div style={{ marginBottom:24 }}>
+          <div style={{ fontSize:12, fontWeight:600, color:"var(--text2)", letterSpacing:0.5, textTransform:"uppercase", marginBottom:12 }}>Actualizar datos desde CV</div>
+          <CVUpload onExtracted={extracted => setDraft(f => ({ ...f, ...extracted }))} isLoading={cvLoading} setIsLoading={setCvLoading} />
+        </div>
+      )}
+
+      <div style={{ fontSize:11, fontWeight:700, color:"var(--text3)", letterSpacing:0.5, textTransform:"uppercase", margin:"0 0 14px", borderBottom:"1px solid var(--border)", paddingBottom:8 }}>Foto de Perfil</div>
+      <div style={{ display:"flex", alignItems:"center", gap:20, marginBottom:24 }}>
+        <div style={{ position:"relative", width:88, height:88, borderRadius:"50%", background:"var(--surface2)", border:"2px solid var(--border)", overflow:"hidden", flexShrink:0, display:"flex", alignItems:"center", justifyContent:"center" }}>
+          {photo
+            ? <img src={photo} alt="Foto de perfil" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+            : <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" strokeWidth="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          }
+        </div>
+        <div>
+          <div style={{ fontSize:13, fontWeight:500, marginBottom:8, color:"var(--text)" }}>
+            {photo ? profile.name || "Tu foto" : "Sin foto de perfil"}
+          </div>
+          <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+            <label style={{ padding:"8px 14px", background:"var(--surface)", border:"1px solid var(--border)", borderRadius:"var(--radius)", fontSize:12, fontWeight:500, cursor:"pointer", color:"var(--text)", transition:"border-color 0.15s" }} onMouseEnter={e=>e.currentTarget.style.borderColor="var(--border2)"} onMouseLeave={e=>e.currentTarget.style.borderColor="var(--border)"}>
+              {photo ? "Cambiar foto" : "Subir foto"}
+              <input type="file" accept="image/*" style={{ display:"none" }} onChange={e => handlePhoto(e.target.files?.[0])} />
+            </label>
+            {photo && <button className="btn-danger" style={{ padding:"8px 14px", fontSize:12 }} onClick={removePhoto}>Eliminar</button>}
+          </div>
+          <div style={{ fontSize:11, color:"var(--text3)", marginTop:6 }}>Tu foto se guarda localmente en este navegador</div>
+        </div>
+      </div>
+
+      {sections.map(sec => (
+        <div key={sec.title}>
+          <div style={{ fontSize:11, fontWeight:700, color:"var(--text3)", letterSpacing:0.5, textTransform:"uppercase", margin:"22px 0 14px", borderBottom:"1px solid var(--border)", paddingBottom:8 }}>{sec.title}</div>
+          <div className="grid2" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16 }}>
+            {sec.keys.map(f => (
+              <div key={f.key} style={f.ml ? { gridColumn:"span 2" } : {}}>
+                <label className="label">{f.label}</label>
+                {editing
+                  ? f.ml
+                    ? <textarea className="textarea" style={{ minHeight:70, marginBottom:0 }} value={draft[f.key]||""} onChange={set(f.key)} />
+                    : <input className="input" style={{ marginBottom:0 }} value={draft[f.key]||""} onChange={set(f.key)} />
+                  : <div style={{ background:"var(--surface2)", border:"1px solid var(--border)", borderRadius:8, padding:"10px 14px", fontSize:13, lineHeight:1.65, marginBottom:0, minHeight:40, color:profile[f.key] ? "var(--text)" : "var(--text3)", fontStyle:profile[f.key] ? "normal" : "italic", whiteSpace:"pre-wrap" }}>
+                      {profile[f.key] || "Sin datos"}
+                    </div>
+                }
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── ROOT APP ──────────────────────────────────────────────────────────────────
+function App() {
+  const [profile, setProfile] = useState(() => {
+    try { const s = localStorage.getItem("jh_profile"); return s ? JSON.parse(s) : null; } catch { return null; }
+  });
+  const [tab, setTab] = useState("generator");
+  const [apps, setApps] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("jh_apps") || "[]"); } catch { return []; }
+  });
+
+  useEffect(() => { if (profile) try { localStorage.setItem("jh_profile", JSON.stringify(profile)); } catch {} }, [profile]);
+  useEffect(() => { try { localStorage.setItem("jh_apps", JSON.stringify(apps)); } catch {} }, [apps]);
+
+  const addApp = useCallback(app => setApps(p => [app, ...p]), []);
+  const updateApp = useCallback((id, status) => setApps(p => p.map(a => a.id === id ? { ...a, status } : a)), []);
+  const deleteApp = useCallback(id => setApps(p => p.filter(a => a.id !== id)), []);
+  const saveFromAnalyzer = useCallback(({ company, position, letter }) => {
+    addApp({ id:Date.now(), company, position, date:new Date().toISOString().split("T")[0], status:"applied", notes:"Generada via Analizador", coverLetter:letter });
+    alert("Guardado en Mis Aplicaciones.");
+  }, [addApp]);
+
+  const handleReset = () => {
+    localStorage.removeItem("jh_profile"); localStorage.removeItem("jh_apps");
+    setApps([]); setProfile(null);
+  };
+
+  if (!profile) return <Onboarding onComplete={p => { setProfile(p); setTab("generator"); }} />;
+
+  const cv = buildCV(profile);
+
+  return (
+    <div style={{ background:"var(--bg)", minHeight:"100vh", color:"var(--text)" }}>
+      <div style={{ maxWidth:1060, margin:"0 auto", padding:"0 24px" }}>
+        <header style={{ borderBottom:"1px solid var(--border)", padding:"16px 0", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+            {(() => { try { const p = localStorage.getItem("jh_photo"); return p ? <img src={p} alt="" style={{ width:32, height:32, borderRadius:"50%", objectFit:"cover", border:"1.5px solid var(--border)" }} /> : null; } catch { return null; } })()}
+            <div style={{ fontFamily:"'DM Mono',monospace", fontSize:13, fontWeight:500, letterSpacing:0.5, color:"var(--text)" }}>JobHunter</div>
+            <div style={{ width:1, height:14, background:"var(--border)" }} />
+            <div style={{ fontSize:13, color:"var(--text2)" }}>{profile.name.split(" ")[0]}</div>
+          </div>
+          <div style={{ background:"var(--accent-bg)", border:"1px solid var(--accent-border)", color:"var(--accent)", fontSize:11, fontWeight:600, padding:"4px 12px", borderRadius:99, letterSpacing:0.3, fontFamily:"'DM Mono',monospace" }}>
+            {apps.length} aplicaciones
+          </div>
+        </header>
+
+        <nav style={{ display:"flex", gap:0, borderBottom:"1px solid var(--border)", marginTop:0, overflowX:"auto" }}>
+          {TABS.map(t => (
+            <button key={t.id} className={`tab-btn${tab === t.id ? " active" : ""}`} onClick={() => setTab(t.id)}>{t.label}</button>
+          ))}
+        </nav>
+
+        {tab === "generator"  && <CoverLetterTab cv={cv} />}
+        {tab === "jobsearch"  && <JobSearchTab cv={cv} />}
+        {tab === "analyzer"   && <AnalyzerTab cv={cv} onSave={saveFromAnalyzer} />}
+        {tab === "imagejob"   && <ImageJobTab cv={cv} />}
+        {tab === "tracker"    && <TrackerTab apps={apps} onAdd={addApp} onUpdate={updateApp} onDelete={deleteApp} />}
+        {tab === "strategy"   && <StrategyTab cv={cv} />}
+        {tab === "profile"    && <ProfileTab profile={profile} onUpdate={setProfile} onReset={handleReset} />}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
